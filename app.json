@@ -18,6 +18,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "page.everly.ChoirTexts",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -25,6 +26,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "88febe99-cccb-44f2-a391-a2c460d895a3"
+      }
     }
   }
 }

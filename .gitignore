@@ -33,3 +33,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+pb/
+src/endpoints*.json
+!src/endpoints.template.json
