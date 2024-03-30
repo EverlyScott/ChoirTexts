@@ -1,40 +1,61 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
-import { MD3Colors, MD3DarkTheme, MD3LightTheme, PaperProvider } from "react-native-paper";
+import { ActivityIndicator, MD3Colors, MD3DarkTheme, MD3LightTheme, PaperProvider, useTheme } from "react-native-paper";
 import Router from "./app/router";
 import { useContext, useEffect, useState } from "react";
-import configContext, { defaultConfig } from "./src/contexts/config";
+import configContext, { ConfigContextProvider, defaultConfig } from "./src/contexts/config";
 import storage from "./src/storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { Config } from "./src/types";
+import pb, { StoredAuth } from "./src/pocketbase";
+import { EventSourcePolyfill } from "event-source-polyfill";
+
+EventSourcePolyfill;
+
+global.EventSource = EventSourcePolyfill;
 
 const App: React.FC = () => {
-  const [config, setConfig] = useState(defaultConfig);
+  const theme = useTheme();
   const colorScheme = useColorScheme();
+  const [config, setConfig] = useState();
+  const [loaded, setLoaded] = useState(false);
 
+  //Init
   useEffect(() => {
-    async () => {
-      const newConfig = await storage.load({ key: "config" });
-      if (newConfig) {
-        setConfig(newConfig);
+    (async () => {
+      try {
+        const restoredAuthStore = await storage.load<StoredAuth>({ key: "auth" });
+        pb.authStore.save(restoredAuthStore.token, restoredAuthStore.model);
+        setLoaded(true);
+      } catch {
+        console.warn("Stored auth does not exist! Will open login page.");
+        setLoaded(true);
       }
-    };
+    })();
   }, []);
 
-  const handleUpdateConfig = (newConfig: Config) => {
-    storage.save({ key: "config", data: newConfig, expires: null });
-    setConfig(newConfig);
-  };
+  const Main = loaded ? Router : Loading;
 
-  //TODO: fix scheme detection
   return (
-    <PaperProvider theme={colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme}>
-      <NavigationContainer>
-        <configContext.Provider value={[config, handleUpdateConfig]}>
-          <Router />
-        </configContext.Provider>
-      </NavigationContainer>
-    </PaperProvider>
+    <ConfigContextProvider>
+      <PaperProvider theme={colorScheme === "dark" ? MD3DarkTheme : MD3LightTheme}>
+        <NavigationContainer>
+          <Main />
+        </NavigationContainer>
+      </PaperProvider>
+    </ConfigContextProvider>
+  );
+};
+
+const Loading = () => {
+  const theme = useTheme();
+
+  return (
+    <View
+      style={{ backgroundColor: theme.colors.background, flexGrow: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      <ActivityIndicator size={50} />
+    </View>
   );
 };
 

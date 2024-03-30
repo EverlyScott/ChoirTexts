@@ -19,15 +19,15 @@ const LoginPassword: React.FC<NativeStackScreenProps<OobeStackParams, "LoginPass
 
   const handleLogin = async () => {
     setError(false);
-    console.log(email, password);
     try {
       const res = await pb.collection(Collections.Users).authWithPassword(email, password);
       if (res.token) {
-        config.oobeComplete = true;
-        setConfig(config);
-        console.log(config);
+        setSuccess(true);
+        const newConfig = Object.assign({}, config);
+        newConfig.oobeComplete = true;
+        setConfig(newConfig);
       } else {
-        console.log(res);
+        console.warn(res);
       }
     } catch (err) {
       console.error(err);
@@ -43,6 +43,7 @@ const LoginPassword: React.FC<NativeStackScreenProps<OobeStackParams, "LoginPass
           flexGrow: 1,
           justifyContent: "center",
           alignItems: "center",
+          backgroundColor: theme.colors.background,
         }}
       >
         <ScrollView

@@ -1,11 +1,15 @@
 import { Text } from "react-native";
 import Header from "../../src/components/header";
 import { Button } from "react-native-paper";
-import { useContext } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import configContext from "../../src/contexts/config";
 
 const Debug: React.FC = () => {
   const [config, setConfig] = useContext(configContext);
+
+  useEffect(() => {
+    console.log(config);
+  }, [config]);
 
   return (
     <>
@@ -13,8 +17,9 @@ const Debug: React.FC = () => {
       <Button
         mode="contained"
         onPress={() => {
-          config.oobeComplete = false;
-          setConfig(config);
+          const newConfig = Object.assign({}, config);
+          newConfig.oobeComplete = false;
+          setConfig(newConfig);
         }}
       >
         Reset OOBE

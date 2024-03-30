@@ -1,34 +1,43 @@
-import { useContext, useEffect, useState } from "react";
-import { BottomNavigation } from "react-native-paper";
-import { BaseRoute } from "react-native-paper/lib/typescript/components/BottomNavigation/BottomNavigation";
-import storage from "../src/storage";
-
-//Import Pages
-import Home from "./home/page";
-import Debug from "./debug/page";
-import Login from "./oobe/login";
-import OobeNavigator from "./oobe/navigator";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Group } from "../src/types";
+import MainNav from "./mainNavigator";
+import GroupComponent from "./group/page";
+import AccountSettings from "./settings/account";
+import { useContext } from "react";
 import configContext from "../src/contexts/config";
+import OobeNavigator from "./oobe/navigator";
+import pb from "../src/pocketbase";
+import { useTheme } from "react-native-paper";
+
+export type MainNavigatorParams = {
+  Main: undefined;
+  Group: { group: Group };
+  AccountSettings: undefined;
+};
+
+const Stack = createNativeStackNavigator<MainNavigatorParams>();
 
 const Router: React.FC = () => {
   const [config] = useContext(configContext);
+  const theme = useTheme();
 
-  const [index, setIndex] = useState(0);
-  const [routes] = useState<BaseRoute[]>([
-    { key: "home", title: "Home", focusedIcon: "home", unfocusedIcon: "home-outline" },
-    { key: "debug", title: "debug" },
-  ]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    home: Home,
-    debug: Debug,
-  });
+  console.log(JSON.stringify(theme.colors));
 
   if (config.oobeComplete) {
-    return <BottomNavigation navigationState={{ index, routes }} onIndexChange={setIndex} renderScene={renderScene} />;
-  } else {
-    return <OobeNavigator />;
+    if (pb.authStore.model === null) {
+      return <OobeNavigator showResetSnackbar />;
+    }
+
+    return (
+      <Stack.Navigator initialRouteName="Main" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Main" component={MainNav} />
+        <Stack.Screen name="Group" component={GroupComponent} />
+        <Stack.Screen name="AccountSettings" component={AccountSettings} />
+      </Stack.Navigator>
+    );
   }
+
+  return <OobeNavigator />;
 };
 
 export default Router;

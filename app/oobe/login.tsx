@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, View } from "react-native";
-import { Appbar, Button, Text, TextInput } from "react-native-paper";
+import { Linking, ScrollView, View } from "react-native";
+import { Appbar, Button, Text, TextInput, useTheme } from "react-native-paper";
 import { OobeStackParams } from "./navigator";
 import Header from "../../src/components/header";
 import pb from "../../src/pocketbase";
@@ -10,12 +10,12 @@ import { AuthMethodsList, ExternalAuthModel } from "pocketbase";
 
 const Login: React.FC<NativeStackScreenProps<OobeStackParams, "Login">> = ({ navigation, route }) => {
   const [authMethods, setAuthMethods] = useState<AuthMethodsList>();
+  const theme = useTheme();
 
   useEffect(() => {
     (async () => {
       try {
         setAuthMethods(await pb.collection(Collections.Users).listAuthMethods());
-        console.log(authMethods);
       } catch (err) {
         console.error(err.originalError);
       }
@@ -25,7 +25,9 @@ const Login: React.FC<NativeStackScreenProps<OobeStackParams, "Login">> = ({ nav
   return (
     <>
       <Header title="Setup" navigation={navigation} />
-      <View style={{ marginHorizontal: 16, flexGrow: 1, alignItems: "center" }}>
+      <View
+        style={{ paddingHorizontal: 16, flexGrow: 1, alignItems: "center", backgroundColor: theme.colors.background }}
+      >
         <View style={{ width: "100%", maxWidth: 500, flexGrow: 1 }}>
           <View
             style={{
@@ -68,10 +70,19 @@ const Login: React.FC<NativeStackScreenProps<OobeStackParams, "Login">> = ({ nav
                   mode="contained-tonal"
                   icon="google"
                   onPress={() => {
-                    // pb.collection(Collections.Users).authWithOAuth2({});
+                    pb.collection(Collections.Users)
+                      .authWithOAuth2({
+                        provider: provider.name,
+                        urlCallback: (url) => {
+                          console.log(url);
+                        },
+                      })
+                      .catch((err) => {
+                        console.log(err, err.originalError);
+                      });
                   }}
                 >
-                  Continue with Google (TODO)
+                  Continue with Google
                 </Button>
               );
             }) ?? <></>}
