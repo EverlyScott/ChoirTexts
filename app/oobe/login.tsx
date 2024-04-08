@@ -7,6 +7,8 @@ import pb from "../../src/pocketbase";
 import { Collections } from "../../src/types";
 import { useEffect, useState } from "react";
 import { AuthMethodsList, ExternalAuthModel } from "pocketbase";
+import WebBrowser from "expo-web-browser";
+import OAuthProvider from "./oAuthProvider";
 
 const Login: React.FC<NativeStackScreenProps<OobeStackParams, "Login">> = ({ navigation, route }) => {
   const [authMethods, setAuthMethods] = useState<AuthMethodsList>();
@@ -65,26 +67,7 @@ const Login: React.FC<NativeStackScreenProps<OobeStackParams, "Login">> = ({ nav
               </Button>
             )}
             {authMethods?.authProviders?.map?.((provider) => {
-              return (
-                <Button
-                  mode="contained-tonal"
-                  icon="google"
-                  onPress={() => {
-                    pb.collection(Collections.Users)
-                      .authWithOAuth2({
-                        provider: provider.name,
-                        urlCallback: (url) => {
-                          console.log(url);
-                        },
-                      })
-                      .catch((err) => {
-                        console.log(err, err.originalError);
-                      });
-                  }}
-                >
-                  Continue with Google
-                </Button>
-              );
+              return <OAuthProvider provider={provider} />;
             }) ?? <></>}
           </View>
         </View>

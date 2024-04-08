@@ -30,7 +30,8 @@
     "react-native-sse": "^1.2.1",
     "react-native-storage": "^1.0.1",
     "react-navigation": "^5.0.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "expo-web-browser": "~12.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
